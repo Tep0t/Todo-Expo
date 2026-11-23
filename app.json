@@ -20,7 +20,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.louisqt1.todoexpo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,6 +29,16 @@
     "plugins": [
       "expo-router",
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "4c28ad5b-da09-4727-bd8b-b13703c9e0e8"
+      }
+    }
   }
 }
