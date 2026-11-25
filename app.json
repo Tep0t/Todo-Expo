@@ -21,7 +21,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.louisqt1.todoexpo"
+      "package": "com.stephenruiz.todoexpo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -37,8 +37,9 @@
         }
       },
       "eas": {
-        "projectId": "4c28ad5b-da09-4727-bd8b-b13703c9e0e8"
+        "projectId": "6c8fd1c2-b038-4148-9027-8bd8e14a5f61"
       }
-    }
+    },
+    "owner": "tep0t"
   }
 }

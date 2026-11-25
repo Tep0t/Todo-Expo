@@ -10,13 +10,29 @@ import {
   View,
 } from 'react-native';
 
-import { supabase } from '../../utils/supabase';
+import { useAuth } from '@/auth';
+import { AppwriteException } from '../../utils/appwrite';
+
+function getSignInErrorMessage(error: unknown) {
+  if (
+    error instanceof AppwriteException &&
+    (error.code === 401 || error.type === 'user_invalid_credentials')
+  ) {
+    return 'Invalid email address or password.';
+  }
+
+  return error instanceof Error
+    ? error.message
+    : 'Unable to sign in. Please try again.';
+}
 
 export default function LoginScreen() {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isAndroid = Platform.OS === 'android';
 
   const submit = async () => {
     if (isSubmitting) return;
@@ -29,25 +45,9 @@ export default function LoginScreen() {
     setIsSubmitting(true);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      if (signInError) {
-        const message = signInError.message.toLowerCase();
-        if (message.includes('email not confirmed')) {
-          setError('Please confirm your email address before signing in.');
-        } else if (message.includes('invalid login credentials')) {
-          setError('Invalid email address or password.');
-        } else {
-          setError(signInError.message);
-        }
-      }
+      await signIn(email.trim(), password);
     } catch (signInError: unknown) {
-      setError(
-        signInError instanceof Error ? signInError.message : 'Unable to sign in. Please try again.',
-      );
+      setError(getSignInErrorMessage(signInError));
     } finally {
       setIsSubmitting(false);
     }
@@ -62,6 +62,7 @@ export default function LoginScreen() {
         <Text style={styles.title}>Todo App</Text>
         <Text style={styles.subtitle}>Sign in to continue</Text>
 
+        {isAndroid && <Text style={styles.androidLabel}>Email Address</Text>}
         <TextInput
           value={email}
           onChangeText={(v) => {
@@ -69,12 +70,14 @@ export default function LoginScreen() {
             setError(null);
           }}
           placeholder="Email address"
+          placeholderTextColor={isAndroid ? '#64748b' : undefined}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
-          style={styles.input}
+          style={isAndroid ? [styles.input, styles.androidInput] : styles.input}
           testID="email"
         />
+        {isAndroid && <Text style={styles.androidLabel}>Password</Text>}
         <TextInput
           value={password}
           onChangeText={(v) => {
@@ -82,9 +85,10 @@ export default function LoginScreen() {
             setError(null);
           }}
           placeholder="Password"
+          placeholderTextColor={isAndroid ? '#64748b' : undefined}
           secureTextEntry
           onSubmitEditing={() => void submit()}
-          style={styles.input}
+          style={isAndroid ? [styles.input, styles.androidInput] : styles.input}
           testID="password"
         />
 
@@ -123,6 +127,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 28, fontWeight: '800', color: '#0f172a' },
   subtitle: { color: '#64748b', marginBottom: 8 },
+  androidLabel: { color: '#334155', fontSize: 14, fontWeight: '600' },
   input: {
     borderWidth: 1,
     borderColor: '#cbd5e1',
@@ -130,6 +135,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
   },
+  androidInput: { color: '#0f172a', backgroundColor: '#fff' },
   error: { color: '#dc2626' },
   button: {
     backgroundColor: '#2563eb',

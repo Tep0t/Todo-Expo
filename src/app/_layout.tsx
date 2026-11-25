@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AuthProvider, useAuth } from '@/auth';
 import { TodoProvider, useTodos } from '@/todos';
@@ -17,10 +17,41 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { user, isLoading: authLoading } = useAuth();
+  const {
+    user,
+    isLoading: authLoading,
+    sessionError,
+    refreshUser,
+  } = useAuth();
   const { isLoading: todosLoading } = useTodos();
 
-  if (authLoading || todosLoading) {
+  if (authLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (sessionError && !user) {
+    return (
+      <View style={styles.sessionError}>
+        <Text style={styles.sessionErrorTitle}>Unable to restore your session</Text>
+        <Text style={styles.sessionErrorMessage}>{sessionError.message}</Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            void refreshUser().catch(() => undefined);
+          }}
+          style={styles.retryButton}
+        >
+          <Text style={styles.retryButtonText}>Try again</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  if (todosLoading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator size="large" />
@@ -46,3 +77,22 @@ function RootNavigator() {
     </Stack>
   );
 }
+
+const styles = StyleSheet.create({
+  sessionError: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    gap: 12,
+  },
+  sessionErrorTitle: { color: '#0f172a', fontSize: 18, fontWeight: '700' },
+  sessionErrorMessage: { color: '#64748b', textAlign: 'center' },
+  retryButton: {
+    backgroundColor: '#2563eb',
+    borderRadius: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+  },
+  retryButtonText: { color: '#fff', fontWeight: '700' },
+});

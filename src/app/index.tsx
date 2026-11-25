@@ -13,10 +13,7 @@ export default function TodoListScreen() {
   const [filter, setFilter] = useState<TodoStatus | null>(null);
 
   const visible = filter ? todos.filter((t) => t.status === filter) : todos;
-  const displayName =
-    typeof user?.user_metadata.full_name === 'string'
-      ? user.user_metadata.full_name
-      : user?.email?.split('@')[0] ?? 'there';
+  const displayName = user?.name || user?.email?.split('@')[0] || 'there';
 
   return (
     <View style={styles.screen}>
@@ -105,7 +102,14 @@ export default function TodoListScreen() {
                 }}
                 hitSlop={6}
               >
-                <Text style={styles.delete}>✕</Text>
+                <View style={styles.deleteIcon} pointerEvents="none">
+                  <View style={styles.deleteHandle} />
+                  <View style={styles.deleteLid} />
+                  <View style={styles.deleteCan}>
+                    <View style={styles.deleteRidge} />
+                    <View style={styles.deleteRidge} />
+                  </View>
+                </View>
               </Pressable>
             </Pressable>
           );
@@ -144,7 +148,31 @@ const styles = StyleSheet.create({
   itemTitle: { fontSize: 16, fontWeight: '600', color: '#0f172a' },
   itemDone: { textDecorationLine: 'line-through', color: '#94a3b8' },
   itemDescription: { color: '#64748b' },
-  delete: { color: '#dc2626', fontSize: 16, fontWeight: '700', paddingHorizontal: 4 },
+  deleteIcon: { width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
+  deleteHandle: {
+    width: 6,
+    height: 3,
+    borderWidth: 1,
+    borderColor: '#dc2626',
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 2,
+    borderTopRightRadius: 2,
+  },
+  deleteLid: { width: 14, height: 2, borderRadius: 1, backgroundColor: '#dc2626' },
+  deleteCan: {
+    width: 11,
+    height: 10,
+    borderWidth: 1,
+    borderColor: '#dc2626',
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 2,
+    borderBottomRightRadius: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    paddingHorizontal: 2,
+  },
+  deleteRidge: { width: 1, height: 6, borderRadius: 1, backgroundColor: '#dc2626' },
   fab: {
     position: 'absolute',
     right: 24,
@@ -163,3 +191,4 @@ const styles = StyleSheet.create({
   },
   fabText: { color: '#fff', fontSize: 30, lineHeight: 32 },
 });
+
